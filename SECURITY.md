@@ -1,166 +1,213 @@
 # Security Policy
 
-## Current Security Limitations
+<div align="center">
 
-**This is a research prototype, not a production-ready system.**
+**⚠️ Research Prototype — NOT Production-Ready**
 
-The current implementation has the following security limitations:
-
-### No Encryption
-- All communication is cleartext UDP
-- Messages can be intercepted and read by network observers
-- No protection against man-in-the-middle attacks
-
-### No Authentication
-- Anyone who can reach the collector port can issue commands
-- No verification of agent or collector identity
-- Vulnerable to unauthorized command injection
-
-### No Authorization
-- No access control or user management
-- All connected agents have full filesystem access
-- No command whitelisting or restrictions
-
-### No Integrity Verification
-- No HMAC or message signatures
-- Messages can be tampered with in transit
-- No way to detect modified commands or responses
-
-### No Rate Limiting
-- No protection against command flooding
-- Vulnerable to resource exhaustion attacks
-- No throttling of file transfers
+</div>
 
 ---
 
-## Production Deployment Requirements
+## 🚨 Current Status
 
-**For production use, the following security measures MUST be implemented:**
-
-### 1. Encryption
-- **AES-256-GCM** for payload encryption
-- **Perfect Forward Secrecy** using ephemeral key exchange
-- **TLS 1.3** if using TCP transport
-
-### 2. Authentication
-- **Mutual TLS** with certificate validation
-- **Pre-shared keys** for agent-collector authentication
-- **HMAC-SHA256** for message signing
-
-### 3. Authorization
-- **Command whitelisting** per agent
-- **Path restrictions** (sandbox to specific directories)
-- **Read-only mode** option for monitoring-only use cases
-
-### 4. Network Security
-- **Firewall rules** to restrict collector access
-- **VPN or private network** deployment
-- **IP whitelisting** for collector endpoint
-
-### 5. Audit and Monitoring
-- **Comprehensive logging** of all operations
-- **Alerting** for suspicious activity
-- **Regular security audits** of deployment
+| Security Layer | Status | Risk Level |
+|----------------|--------|------------|
+| 🔒 Encryption | ❌ None | 🔴 Critical |
+| 🔐 Authentication | ❌ None | 🔴 Critical |
+| 🧿 Authorization | ❌ None | 🔴 Critical |
+| ✍️ Integrity | ❌ No HMAC | 🔴 Critical |
+| 🚦 Rate Limiting | ❌ None | 🟡 High |
 
 ---
 
-## Responsible Disclosure
+## Known Limitations
 
-### Reporting Security Vulnerabilities
-
-If you discover a security vulnerability in this implementation:
-
-1. **Do NOT** create a public issue
-2. **DO** send details via private disclosure:
-   - Email: [security@example.com]
-   - PGP Key: [Link to key]
-3. **Include**:
-   - Vulnerability description
-   - Steps to reproduce
-   - Potential impact
-   - Suggested fix (if any)
-
-### Response Timeline
-
-- **Acknowledgment**: Within 48 hours
-- **Assessment**: Within 7 days
-- **Fix**: As soon as practicable
-- **Public Disclosure**: After fix is deployed
+| Category | Issue | Mitigation |
+|----------|-------|------------|
+| **Transport** | Cleartext UDP | Use VPN/private network |
+| **Identity** | No verification | Pre-shared keys |
+| **Access** | Full filesystem | Sandboxing/containers |
+| **Tampering** | No signatures | Deploy in trusted network |
+| **Flooding** | No throttling | Firewall rules |
+| **Replay** | Seq not validated | Short-lived sessions |
 
 ---
 
-## Security Best Practices for Deployment
+## 🎯 Production Requirements
+
+| Layer | Requirement | Priority |
+|-------|-------------|----------|
+| **Encryption** | AES-256-GCM or TLS 1.3 | 🔴 Critical |
+| **Authentication** | Mutual TLS or PSK | 🔴 Critical |
+| **Authorization** | Command whitelisting | 🔴 Critical |
+| **Network** | Firewall + IP whitelist | 🔴 Critical |
+| **Integrity** | HMAC-SHA256 | 🟡 High |
+| **Audit** | Comprehensive logging | 🟡 High |
+
+---
+
+## 🛡️ Deployment Security
 
 ### Network Isolation
+
 ```bash
-# Deploy on isolated network
-# Use VPN for collector access
-# Restrict with firewall rules:
+# Firewall rules - allow only specific IPs
 sudo ufw allow from 10.0.0.0/8 to any port 5353 proto udp
+
+# VPN-required deployment
+# Use WireGuard, OpenVPN, or private network
 ```
 
-### Filesystem Sandbox
+### Filesystem Sandboxing
+
 ```bash
-# Run agent with dedicated user
+# Dedicated user
 useradd -r -s /bin/false firmus-agent
-# Chroot or containerize
-# Set filesystem permissions
+
+# Restrict directory access
 chmod -R 750 /var/monitored/data
+
+# Containerize (Docker/podman)
+# Use chroot for additional isolation
 ```
 
 ### Monitoring
+
 ```bash
 # Log all connections
-# Monitor for unusual activity
-# Set up alerts for file access patterns
+# Monitor unusual access patterns
+# Alert on file access outside expected hours
 ```
 
 ---
 
-## Threat Model
+## 🎯 Threat Model
 
-### Assumed Threats
+### Protected Threats (with mitigation)
 
-This prototype does **NOT** protect against:
+| Threat | Mitigation |
+|--------|------------|
+| **Accidental exposure** | Network isolation |
+| **Casual scanning** | Firewall rules |
+| **Basic probing** | VPN deployment |
 
-1. **Network Eavesdropping** - Cleartext communication
-2. **Command Injection** - No authentication
-3. **Unauthorized Access** - No access control
-4. **Data Tampering** - No integrity checks
-5. **Replay Attacks** - No sequence number validation
+### Unprotected Threats
+
+| Threat | Why Not Protected |
+|--------|-------------------|
+| **Network eavesdropping** | No encryption |
+| **Command injection** | No authentication |
+| **Unauthorized access** | No authorization |
+| **Data tampering** | No integrity checks |
+| **Replay attacks** | Seq not validated |
 
 ### Out of Scope
 
-The following are explicitly out of scope for this research prototype:
-
-- Protection against compromised collector
-- Protection against compromised agent host
-- Defense against determined attackers
-- Compliance requirements (SOC2, HIPAA, etc.)
+- Compromised collector
+- Compromised agent host
+| **Determined attackers** | Need full security stack |
+| Compliance requirements | SOC2, HIPAA, etc. |
 
 ---
 
-## Security Research Context
+## 📧 Responsible Disclosure
 
-This tool is intended for:
+### Reporting Vulnerabilities
 
-- **Academic research** in distributed systems
-- **Legitimate system administration** with proper authorization
-- **IoT device monitoring** in trusted environments
-- **Educational purposes** to understand network protocols
+<div align="center">
 
-**NOT intended for**:
+**DO NOT** create public issues
 
-- Bypassing security controls without authorization
-- Accessing systems without owner consent
-- Evading detection in unauthorized scenarios
+**DO** report privately:
+
+</div>
+
+| Method | Contact |
+|--------|---------|
+| Email | security@example.com |
+| PGP Key | [Link to key] |
+
+### Include in Report
+
+- Vulnerability description
+- Steps to reproduce
+| Potential impact |
+| Suggested fix (if known) |
+
+### Response Timeline
+
+```mermaid
+graph LR
+    A[Report Received] --> B[Acknowledgment<br/>48 hours]
+    B --> C[Assessment<br/>7 days]
+    C --> D[Fix Deployed<br/>ASAP]
+    D --> E[Public Disclosure<br/>After fix]
+```
+
+| Stage | Timeline |
+|-------|----------|
+| **Acknowledgment** | Within 48 hours |
+| **Assessment** | Within 7 days |
+| **Fix** | As soon as practicable |
+| **Public Disclosure** | After fix deployed |
 
 ---
 
-## Disclaimer
+## 🎓 Use Context
 
-This software is provided for research and educational purposes only. Users
-are responsible for ensuring compliance with applicable laws and regulations.
-The authors accept no liability for misuse or unauthorized use.
+### Intended For
 
-**Always obtain proper authorization before deploying monitoring agents.**
+| Use Case | Environment |
+|----------|-------------|
+| 🎓 Academic research | Isolated lab networks |
+| 🔧 System administration | Authorized environments |
+| 🏠 IoT monitoring | Trusted home networks |
+| 📚 Education | Classroom/isolated setups |
+
+### NOT Intended For
+
+| Misuse | ❌ |
+|--------|-----|
+| Unauthorized access | Bypassing security controls |
+| Non-consented monitoring | Systems without owner permission |
+| Evasion | Avoiding detection |
+
+---
+
+## 📋 Security Checklist
+
+Before deploying, ensure:
+
+- [ ] Deployed on isolated/trusted network
+- [ ] Firewall rules configured
+- [ ] Filesystem permissions restricted
+- [ ] Dedicated user account created
+- [ ] Logging and monitoring enabled
+- [ ] Legal authorization obtained
+- [ ] Container/chroot isolation considered
+
+---
+
+## ⚖️ Legal Disclaimer
+
+<div align="center">
+
+**Users are responsible for:**
+
+- Obtaining proper authorization before deployment
+- Ensuring compliance with applicable laws
+- Implementing appropriate security measures
+
+**The authors accept no liability for misuse.**
+
+See [DISCLAIMER.md](DISCLAIMER.md) for details.
+
+</div>
+
+---
+
+<div align="center">
+
+**🔒 Always secure before production deployment**
+
+</div>

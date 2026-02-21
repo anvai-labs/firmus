@@ -7,9 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-A research implementation for remote filesystem monitoring of IoT and edge devices behind NAT/firewalls.
+Remote filesystem monitoring for IoT and edge devices behind NAT/firewalls
 
-[⚠️ Security Notice](#security-notice) • [📖 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [📝 Blog Post](MEDIUM_BLOG_POST.md)
+[📖 Documentation](#-documentation) • [🚀 Quick Start](#-quick-start) • [🛡️ Security](#-security-notice)
 
 </div>
 
@@ -17,359 +17,165 @@ A research implementation for remote filesystem monitoring of IoT and edge devic
 
 ## ⚠️ Security Notice
 
-**This is a research prototype, NOT production-ready software.**
+**Research prototype — NOT production-ready**
 
-- ❌ No encryption (cleartext communication)
-- ❌ No authentication (anyone can connect)
-- ❌ No authorization (no access control)
+| Status | Implementation |
+|--------|---------------|
+| 🔒 Encryption | ❌ Cleartext UDP |
+| 🔐 Authentication | ❌ None |
+| 🧿 Authorization | ❌ No access control |
 
-**DO NOT deploy on production systems without additional security measures.**
-
-See [SECURITY.md](SECURITY.md) for details and [DISCLAIMER.md](DISCLAIMER.md) for legal and ethical use guidelines.
-
----
-
-## Overview
-
-FIRMUS enables remote filesystem monitoring through firewalls and NAT without requiring:
-
-- ✅ No root privileges
-- ✅ No port forwarding
-- ✅ No static IP addresses
-- ✅ No VPN infrastructure
-- ✅ No complex configuration
-
-### How It Works
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     YOUR MACHINE                            │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │         DATA COLLECTOR (SERVER)                     │    │
-│  │  Listens on UDP port 5353                          │    │
-│  └────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-                            ▲
-                            │ Outbound connection (firewall-friendly)
-                            │
-┌─────────────────────────────────────────────────────────────┐
-│                    TARGET DEVICE                            │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │         MONITORING AGENT (CLIENT)                   │    │
-│  │  Connects OUT to collector                          │    │
-│  │  Uses ephemeral port                                │    │
-│  └────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
-```
-
-The key insight: **Most firewalls allow outbound connections.** By having the agent initiate the connection, we achieve reliable NAT/firewall traversal.
+**DO NOT deploy without additional security.** See [SECURITY.md](SECURITY.md)
 
 ---
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔓 **Firewall Traversal** | Agent connects out through NAT/firewall |
-| 👤 **No Root Required** | Runs in user space with standard sockets |
-| 📁 **Directory Listing** | Flat and recursive directory tree traversal |
-| 📥 **File Download** | Chunked file transfer with progress tracking |
-| 💓 **Connectivity Check** | Ping/pong for connection verification |
-| 🪶 **Lightweight** | ~500 lines, standard library only |
-| 🐍 **Cross-Platform** | Works on Linux, macOS, Windows |
-
----
-
-## Use Cases
-
-### IoT Device Monitoring
-Monitor home automation, sensors, or edge devices:
+## ⚡ Quick Start
 
 ```bash
-# On IoT device (Raspberry Pi, etc.)
-agent --collector cloud.researchlab.edu:5353 --dir /var/sensor_data
-```
-
-### Remote Data Collection
-Collect research data from field deployments:
-
-```bash
-# Field station agent
-agent --collector data-collector.example.com:5353 --dir /field_data
-```
-
-### Home Server Administration
-Access home servers from anywhere:
-
-```bash
-# Home server agent
-agent --collector my-vps.com:5353 --dir /mnt/storage
-```
-
-### Authorized System Analysis
-Retrieve system logs and diagnostic data during authorized security assessments with proper documentation and approval.
-
----
-
-## Quick Start
-
-### Requirements
-
-- Python 3.8 or higher
-- Network connectivity between collector and agents
-- Write access to working directory (for agent)
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/firmus.git
-cd firmus
-
-# No dependencies required - uses Python standard library only
-```
-
-### Starting the Collector (Server)
-
-**Terminal 1 - On your machine:**
-
-```bash
+# Terminal 1 - Collector (your machine)
 python3 remote_filesystem_research.py collector udp --port 5353
+
+# Terminal 2 - Agent (target device)
+python3 remote_filesystem_research.py agent udp --collector YOUR_IP:5353 --dir /path/to/monitor
 ```
 
-Output:
-```
-╔═══════════════════════════════════════════════════════════════════╗
-║              FIRMUS DATA COLLECTOR (SERVER)                      ║
-║              Listening on port  5353                                 ║
-║              Waiting for agents to connect...                     ║
-╚═══════════════════════════════════════════════════════════════════╝
+---
 
-[*] Available commands (when agent connects):
-    list              List directory contents
-    tree <path>       Recursive directory tree
-    download <file>   Download file from agent
-    ping              Test connectivity
-    help              Show help
-    exit              Stop collector
+## 🏗️ Architecture
+
+```mermaid
+graph LR
+    A[Researcher] --> B[Data Collector]
+    C[IoT Device] --> D[Monitoring Agent]
+    D -->|UDP Outbound| B
+    B -->|Commands| D
+
+    style B fill:#e1f5fe
+    style D fill:#fff3e0
 ```
 
-### Starting the Agent (Client)
+**Key Insight:** Agents initiate **outbound** connections → traverses NAT/firewall automatically
 
-**Terminal 2 - On target device:**
+---
+
+## 📋 Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| 🔓 Firewall Traversal | ✅ | Agent connects out through NAT |
+| 👤 No Root Required | ✅ | Runs in user space |
+| 📁 Directory Listing | ✅ | Flat + recursive tree |
+| 📥 File Download | ✅ | Chunked transfer with resume |
+| 💓 Connectivity Check | ✅ | Ping/pong heartbeat |
+| 🪶 Lightweight | ✅ | ~600 lines, stdlib only |
+| 🐍 Cross-Platform | ✅ | Linux, macOS, Windows |
+
+---
+
+## 🚀 Use Cases
+
+| Use Case | Description | Link |
+|----------|-------------|------|
+| 🏠 **IoT Monitoring** | Smart home sensors on Raspberry Pi | [examples/iot-monitoring.md](examples/iot-monitoring.md) |
+| 🔬 **Research Data** | Field station data collection | [examples/data-collection.md](examples/data-collection.md) |
+| 🖥️ **Home Server** | Remote admin without port forwarding | [examples/basic-usage.md](examples/basic-usage.md) |
+
+---
+
+## 💻 Interactive Commands
 
 ```bash
-python3 remote_filesystem_research.py agent udp \\
-    --collector YOUR_IP:5353 \\
-    --dir /path/to/monitor
-```
-
-Output:
-```
-╔═══════════════════════════════════════════════════════════════════╗
-║              FIRMUS MONITORING AGENT (CLIENT)                     ║
-║              Connecting to collector: YOUR_IP:5353                ║
-║              Working directory: /path/to/monitor                  ║
-╚═══════════════════════════════════════════════════════════════════╝
-
-[*] Press Ctrl+C to stop
-[+] Connected to collector
-```
-
-### Interactive Commands
-
-Once connected, use these commands at the collector:
-
-```bash
-# Test connectivity
-collector (192.168.1.50)> ping
-[+] Response received in 12ms
-
-# List directory (flat)
-collector (192.168.1.50)> list /data
-  logs/
-  sensor_data.json
-  config.yaml
-
-# Recursive directory tree
-collector (192.168.1.50)> tree /data
-  logs/
-    app.log
-    error.log
-  sensor_data.json
-  config.yaml
-
-# Download file
-collector (192.168.1.50)> download /data/sensor_data.json
-[*] Downloading /data/sensor_data.json...
-  Progress: 45.2 KB / 45.2 KB (100%)
-[+] File saved: received/sensor_data.json
-
-# Show help
-collector (192.168.1.50)> help
-
-# Exit
+# At collector prompt
+collector (192.168.1.50)> ping              # Test connectivity
+collector (192.168.1.50)> list /data         # List directory
+collector (192.168.1.50)> tree /data         # Recursive tree
+collector (192.168.1.50)> download /data/sensor.json
 collector (192.168.1.50)> exit
 ```
 
 ---
 
-## Documentation
+## 📖 Documentation
 
 | Document | Description |
 |----------|-------------|
-| [MEDIUM_BLOG_POST.md](MEDIUM_BLOG_POST.md) | Detailed blog post explaining architecture and use cases |
-| [SECURITY.md](SECURITY.md) | Security limitations and production requirements |
-| [DISCLAIMER.md](DISCLAIMER.md) | Legal and ethical use guidelines |
-| [LICENSE](LICENSE) | MIT License |
+| [docs/architecture.md](docs/architecture.md) | Protocol design, message types, data flow |
+| [docs/api.md](docs/api.md) | Class and method reference |
+| [docs/deployment.md](docs/deployment.md) | Installation & configuration guide |
+| [docs/use-cases.md](docs/use-cases.md) | Detailed use case examples |
+| [SECURITY.md](SECURITY.md) | Security limitations & requirements |
+| [DISCLAIMER.md](DISCLAIMER.md) | Legal and ethical guidelines |
 
 ---
 
-## Architecture
+## 🛡️ Security Notice
 
-### Protocol Design
+<div align="center">
 
-FIRMUS uses a simple binary protocol over UDP:
+**⚠️ This is a research prototype.**
 
-```
-[Header: 13 bytes]
-├─ Message Type: 1 byte  (LIST, TREE, PULL, DATA, PING, PONG, ERROR)
-├─ Sequence:     4 bytes (Message sequencing)
-├─ Timestamp:    4 bytes (Unix timestamp)
-└─ Payload Len:  4 bytes (Length of payload)
+See [SECURITY.md](SECURITY.md) for production deployment requirements
 
-[Payload: Variable]
-└─ JSON-encoded data
-```
-
-### Message Types
-
-| Type | Value | Purpose |
-|------|-------|---------|
-| DIRECTORY_LIST | 1 | List directory contents (flat) |
-| DIRECTORY_TREE | 2 | Recursive directory listing |
-| FILE_TRANSFER_REQUEST | 3 | Request file chunk |
-| DATA_RESPONSE | 100 | Return requested data |
-| HEARTBEAT | 5 | Connectivity check |
-| HEARTBEAT_ACK | 102 | Connectivity acknowledgment |
-| ERROR_RESPONSE | 104 | Error information |
-
-### File Transfer
-
-Files are transferred in 8KB chunks with base64 encoding:
-
-1. Collector requests chunk with offset and size
-2. Agent responds with base64-encoded data
-3. Collector decodes and writes to file
-4. Process repeats until file complete
-
-This enables:
-- Resume capability (offset-based)
-- Progress tracking
-- Memory efficiency
-- Network-friendly packets
+</div>
 
 ---
 
-## Performance
+## 📊 Protocol Format
 
-Tested on standard residential network (100 Mbps):
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HEADER (13 bytes)                                          │
+│  ├─ Type: 1 byte  │ Seq: 4 bytes │ TS: 4 bytes │ Len: 4B   │
+├─────────────────────────────────────────────────────────────┤
+│  PAYLOAD (variable)                                         │
+│  └─ JSON encoded data                                       │
+└─────────────────────────────────────────────────────────────┘
+```
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Agent connection | < 100ms | One-way UDP |
-| Directory listing (100 files) | ~50ms | Single packet |
+| Message Type | Value | Direction |
+|--------------|-------|-----------|
+| DIRECTORY_LIST | 1 | Collector → Agent |
+| DIRECTORY_TREE | 2 | Collector → Agent |
+| FILE_TRANSFER_REQUEST | 3 | Collector → Agent |
+| DATA_RESPONSE | 100 | Agent → Collector |
+| HEARTBEAT | 5 | Collector → Agent |
+| HEARTBEAT_ACK | 102 | Agent → Collector |
+| ERROR_RESPONSE | 104 | Agent → Collector |
+
+---
+
+## 📈 Performance
+
+| Operation | Time | Network |
+|-----------|------|----------|
+| Agent connection | <100ms | 100 Mbps residential |
+| Directory list (100 files) | ~50ms | Single UDP packet |
 | File download (1 MB) | ~200ms | 8KB chunks |
-| Recursive scan (1000 files) | ~500ms | Depends on filesystem |
+| Recursive scan (1000 files) | ~500ms | Filesystem dependent |
 
 ---
 
-## Limitations
+## 🔄 Limitations & Future
 
-### Current Limitations
-
-1. **UDP transport only** - No reliability guarantees
-2. **No encryption** - Cleartext communication
-3. **No authentication** - Anyone who can connect can issue commands
-4. **Single-threaded** - One agent at a time
-5. **No compression** - Files transferred as-is
-6. **IPv4 only** - IPv6 not implemented
-
-### Future Enhancements
-
-- [ ] TCP transport option
-- [ ] End-to-end encryption (AES-256-GCM)
-- [ ] Mutual authentication (mTLS)
-- [ ] Multi-agent support
-- [ ] Web-based UI
-- [ ] Agent auto-update
-- [ ] Compression (zlib)
-- [ ] IPv6 support
+| Current | Planned |
+|---------|---------|
+| UDP only | TCP option |
+| No encryption | AES-256-GCM |
+| No auth | mTLS |
+| Single-threaded | Multi-agent |
+| No compression | zlib |
 
 ---
 
-## Contributing
+## 📜 License
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-For security issues, please see [SECURITY.md](SECURITY.md#responsible-disclosure).
-
----
-
-## Citation
-
-If you use FIRMUS in research, please cite:
-
-```bibtex
-@software{firmus2024,
-  title = {FIRMUS: Firewall-traversing Independent Remote Monitoring System},
-  author = {FIRMUS Contributors},
-  year = {2024},
-  url = {https://github.com/yourusername/firmus},
-  note = {Research prototype for remote filesystem monitoring}
-}
-```
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## Disclaimer
-
-**FIRMUS is a research prototype provided for educational and authorized administrative purposes only.**
-
-Users are responsible for:
-- Obtaining proper authorization before deployment
-- Ensuring compliance with applicable laws
-- Implementing appropriate security measures
-
-See [DISCLAIMER.md](DISCLAIMER.md) for legal and ethical use guidelines.
-
-**The authors accept no liability for misuse or unauthorized use.**
-
----
-
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/firmus/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/firmus/discussions)
-- **Security**: See [SECURITY.md](SECURITY.md#responsible-disclosure)
+MIT License — see [LICENSE](LICENSE)
 
 ---
 
 <div align="center">
 
-**[⬆ Back to Top](#firmus)**
+**⚠️ For authorized use only.** See [DISCLAIMER.md](DISCLAIMER.md)
 
 Made with ❤️ for the research community
 
