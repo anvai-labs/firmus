@@ -221,9 +221,9 @@ Access home servers from anywhere:
 agent --collector my-vps.com:5353 --dir /mnt/storage
 ```
 
-### 4. Incident Response
+### 4. Authorized System Analysis
 
-Retrieve logs from compromised systems behind firewalls.
+Retrieve system logs and diagnostic data during authorized security assessments or incident response investigations with proper documentation and approval.
 
 ---
 

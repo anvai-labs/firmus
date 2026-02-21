@@ -106,8 +106,8 @@ Access home servers from anywhere:
 agent --collector my-vps.com:5353 --dir /mnt/storage
 ```
 
-### Incident Response
-Retrieve logs from systems during authorized incident response.
+### Authorized System Analysis
+Retrieve system logs and diagnostic data during authorized security assessments with proper documentation and approval.
 
 ---
 
