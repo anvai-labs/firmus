@@ -3,11 +3,6 @@ name: CI
 on:
   push:
     branches: [main]
-  # Bootstrap trigger: removed after the protected-base workflow is merged
-  # and exact-allowlisted for the private runner group.
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
   pull_request_target:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
