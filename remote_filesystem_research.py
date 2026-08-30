@@ -495,12 +495,12 @@ class MonitoringAgent:
                         })
             else:
                 for name in os.listdir(full_path):
-                    full_path = os.path.join(full_path, name)
+                    entry_path = os.path.join(full_path, name)
 
-                    if os.path.isfile(full_path):
-                        stat = os.stat(full_path)
+                    if os.path.isfile(entry_path):
+                        stat = os.stat(entry_path)
                         files.append({'name': name, 'size': stat.st_size})
-                    elif os.path.isdir(full_path):
+                    elif os.path.isdir(entry_path):
                         dirs.append(name)
 
             return files, dirs
